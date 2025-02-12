@@ -8,6 +8,7 @@ import ru.practicum.ResonseStatsDto;
 import java.util.List;
 
 public interface StatisticService {
+
     ResponseHitDto create(CreateHitDto createHitDto);
     List<ResonseStatsDto> get(CreateStatsDto createStatsDto);
 }
