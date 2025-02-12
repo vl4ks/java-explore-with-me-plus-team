@@ -6,12 +6,11 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class StatsClient extends BaseClient {
@@ -37,21 +36,26 @@ public class StatsClient extends BaseClient {
                 .app(appName)
                 .url(request.getRequestURI())
                 .ip(request.getRemoteAddr())
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
         return post(hitDto);
     }
 
-    public ResponseEntity<Object> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        String uriBuilder = "/stats?start={start}&end={end}";
-        Map<String, Object> params = new HashMap<>();
-        params.put("start", start.format(FORMATTER));
-        params.put("end", end.format(FORMATTER));
-        if (uris != null && !uris.isEmpty()) {
-            params.put("uris", String.join(",", uris));
-        }
-        params.put("unique", true);
+    public ResponseEntity<Object> getStats(String start, String end, List<String> uris, Boolean unique) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/stats")
+                .queryParam("start", start)
+                .queryParam("end", end);
 
-        return get(uriBuilder, params);
+        if (uris != null && !uris.isEmpty()) {
+            builder.queryParam("uris", String.join(",", uris));
+        }
+
+        if (unique != null) {
+            builder.queryParam("unique", unique);
+        }
+
+        String url = builder.toUriString();
+
+        return get(url, null);
     }
 }
