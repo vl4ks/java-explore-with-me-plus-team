@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.service.StatisticServiceImpi;
+import ru.practicum.service.StatisticService;
 
 import java.util.List;
 
@@ -19,17 +19,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatsController {
 
-    private final StatisticServiceImpi statisticServiceImpi;
+    private final StatisticService statisticService;
 
     @GetMapping("/stats")
     public List<ResonseStatsDto> getStats(@RequestBody CreateStatsDto createStatsDto) {
         log.info("Получен запрос на получение статистики по посещениям");
-        return statisticServiceImpi.get(createStatsDto);
+        return statisticService.get(createStatsDto);
     }
 
     @PostMapping("/hit")
     public ResponseHitDto createHit(@RequestBody CreateHitDto createHitDto) {
         log.info("Сохранение информации об обращении к эндпоинту");
-        return statisticServiceImpi.create(createHitDto);
+        return statisticService.create(createHitDto);
     }
 }
