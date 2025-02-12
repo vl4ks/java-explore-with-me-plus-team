@@ -16,7 +16,7 @@ public class CreateHitDto {
     private String app;
 
     @NotBlank
-    private String url;
+    private String uri;
 
     @NotBlank
     private String ip;
