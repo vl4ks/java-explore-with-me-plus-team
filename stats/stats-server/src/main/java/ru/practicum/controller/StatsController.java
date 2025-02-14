@@ -21,7 +21,7 @@ public class StatsController {
     @GetMapping("/stats")
     public List<ResponseStatsDto> getStats(@RequestParam String start,
                                            @RequestParam String end,
-                                           @RequestParam(required = false) List<String> uris,
+                                           @RequestParam(required = false, defaultValue = "{}") List<String> uris,
                                            @RequestParam(required = false, defaultValue = "false") Boolean unique) {
         log.info("Получен запрос на получение статистики по посещениям");
         return statisticService.get(start, end, uris, unique);

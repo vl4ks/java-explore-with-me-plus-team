@@ -40,7 +40,7 @@ public interface StatisticRepository extends JpaRepository<Hit, Long> {
         """,
             nativeQuery = true
     )
-    List<ResponseStatsDto> getByAllUris(String start, String end, List<String> uris);
+    List<ResponseStatsDto> getByAllUris(String start, String end);
 
     interface ResponseStatsDto {
         String getApp();

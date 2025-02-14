@@ -35,8 +35,8 @@ public class StatisticServiceImpi implements StatisticService {
             throw new ValidationException("You need to chose start and end dates.");
         }
         final List<StatisticRepository.ResponseStatsDto> hits;
-        if (uris == null || uris.isEmpty()) {
-            hits = statisticRepository.getByAllUris(start, end, uris);
+        if (uris.isEmpty()) {
+            hits = statisticRepository.getByAllUris(start, end);
         } else {
             hits = statisticRepository.getByUris(start, end, uris);
         }
