@@ -13,8 +13,8 @@ public interface StatisticRepository extends JpaRepository<Hit, Long> {
             SELECT
                 app,
                 uri,
-                COUNT(*) AS cnt,
-                COUNT(DISTINCT ip) AS uniq_cnt
+                COUNT(*) AS hits,
+                COUNT(DISTINCT ip) AS uniqHits
             FROM hit
             WHERE timestamp >= ?1 ::timestamp
                 AND timestamp < ?2 ::timestamp
@@ -29,8 +29,8 @@ public interface StatisticRepository extends JpaRepository<Hit, Long> {
             SELECT
                 app,
                 uri,
-                COUNT(*) AS cnt,
-                COUNT(DISTINCT ip) AS uniq_cnt
+                COUNT(*) AS hits,
+                COUNT(DISTINCT ip) AS uniqHits
             FROM hit
             WHERE timestamp >= ?1 ::timestamp
                 AND timestamp < ?2 ::timestamp
