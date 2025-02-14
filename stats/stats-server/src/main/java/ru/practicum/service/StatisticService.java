@@ -1,7 +1,6 @@
 package ru.practicum.service;
 
 import ru.practicum.CreateHitDto;
-import ru.practicum.CreateStatsDto;
 import ru.practicum.ResponseHitDto;
 import ru.practicum.ResponseStatsDto;
 
