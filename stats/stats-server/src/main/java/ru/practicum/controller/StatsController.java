@@ -2,7 +2,6 @@ package ru.practicum.controller;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ResponseStatsDto;
-import ru.practicum.CreateStatsDto;
 import ru.practicum.ResponseHitDto;
 import ru.practicum.CreateHitDto;
 
@@ -20,9 +19,12 @@ public class StatsController {
     private final StatisticService statisticService;
 
     @GetMapping("/stats")
-    public List<ResponseStatsDto> getStats(@RequestBody @Valid CreateStatsDto createStatsDto) {
+    public List<ResponseStatsDto> getStats(@RequestParam String start,
+                                           @RequestParam String end,
+                                           @RequestParam(required = false) List<String> uris,
+                                           @RequestParam(required = false, defaultValue = "false") Boolean unique) {
         log.info("Получен запрос на получение статистики по посещениям");
-        return statisticService.get(createStatsDto);
+        return statisticService.get(start, end, uris, unique);
     }
 
     @PostMapping("/hit")
