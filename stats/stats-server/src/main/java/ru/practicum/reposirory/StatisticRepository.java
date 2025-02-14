@@ -20,6 +20,7 @@ public interface StatisticRepository extends JpaRepository<Hit, Long> {
                 AND timestamp < ?2 ::timestamp
                 AND uri IN ?3
             GROUP BY 1, 2
+            ORDER BY hits DESC
         """,
         nativeQuery = true
     )
@@ -35,6 +36,7 @@ public interface StatisticRepository extends JpaRepository<Hit, Long> {
             WHERE timestamp >= ?1 ::timestamp
                 AND timestamp < ?2 ::timestamp
             GROUP BY 1, 2
+            ORDER BY hits DESC
         """,
             nativeQuery = true
     )
