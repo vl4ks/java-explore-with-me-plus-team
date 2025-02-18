@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResonseStatsDto {
+public class ResponseStatsDto {
     private String app;
     private String uri;
     private Long hits;
