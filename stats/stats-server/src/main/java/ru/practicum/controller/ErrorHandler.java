@@ -9,7 +9,6 @@ import ru.practicum.exception.ApiError;
 import ru.practicum.exception.InternalServerException;
 import ru.practicum.exception.ValidationException;
 
-import java.io.PrintWriter;
 import java.io.StringWriter;
 
 @RestController
