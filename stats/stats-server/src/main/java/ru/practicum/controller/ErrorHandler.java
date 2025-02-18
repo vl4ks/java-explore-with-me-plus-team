@@ -21,6 +21,7 @@ public class ErrorHandler {
         log.info("500 {}", e.getMessage(), e);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
         String stackTrace = sw.toString();
         return new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error ....", e.getMessage(), stackTrace);
     }
@@ -31,6 +32,7 @@ public class ErrorHandler {
         log.info("400 {}", e.getMessage(), e);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
         String stackTrace = sw.toString();
         return new ApiError(HttpStatus.BAD_REQUEST.value(), "Error ....", e.getMessage(), stackTrace);
     }
