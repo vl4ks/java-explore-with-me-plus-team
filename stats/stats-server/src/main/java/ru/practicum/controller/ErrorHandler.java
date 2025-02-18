@@ -20,7 +20,6 @@ public class ErrorHandler {
     public ApiError handleException(final InternalServerException e, HttpStatus status) {
         log.info("500 {}", e.getMessage(), e);
         StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
         String stackTrace = sw.toString();
         return new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error ....", e.getMessage(), stackTrace);
     }
@@ -30,7 +29,6 @@ public class ErrorHandler {
     public ApiError handleValidationException(final ValidationException e, HttpStatus status) {
         log.info("400 {}", e.getMessage(), e);
         StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
         String stackTrace = sw.toString();
         return new ApiError(HttpStatus.BAD_REQUEST.value(), "Error ....", e.getMessage(), stackTrace);
     }
