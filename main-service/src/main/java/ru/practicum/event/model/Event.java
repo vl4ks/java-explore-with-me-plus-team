@@ -1,4 +1,4 @@
-/*package ru.practicum.event.model;
+package ru.practicum.event.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,4 +14,3 @@ import lombok.NoArgsConstructor;
 @Table(name = "events")
 public class Event {
 }
-*/
