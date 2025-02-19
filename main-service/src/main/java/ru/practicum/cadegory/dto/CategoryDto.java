@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CategoryDto {
 
-    Long id;
+    private Long id;
 
     @NotBlank
     @Size(min = 1, max = 50, message = "Название категории должно быть от 1 до 50 симоволов.")
