@@ -1,6 +1,5 @@
-package ru.practicum.cadegory.dto;
+package ru.practicum.category.dto;
 
-import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
