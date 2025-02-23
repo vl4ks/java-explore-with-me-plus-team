@@ -2,6 +2,7 @@ package ru.practicum.request.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.event.service.EventService;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
@@ -10,7 +11,6 @@ import ru.practicum.request.mapper.EventRequestDtoMapper;
 import ru.practicum.request.model.EventRequest;
 import ru.practicum.request.model.EventRequestStatus;
 import ru.practicum.request.storage.EventRequestRepository;
-import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventRequestServiceImpl implements EventRequestService {
     private final UserService userService;
+    private final EventService eventService;
     private final EventRequestRepository eventRequestRepository;
     private final EventRequestDtoMapper eventRequestDtoMapper;
 
@@ -86,6 +87,12 @@ public class EventRequestServiceImpl implements EventRequestService {
 
     @Override
     public Collection<ParticipationRequestDto> getByEventId(Long eventInitiatorId, Long eventId) {
+        if (userService.findById(eventInitiatorId) == null) {
+            throw new NotFoundException("User with id=" + eventInitiatorId + " was not found");
+        }
+        if (eventService.findById(eventInitiatorId, eventId) == null) {
+            throw new NotFoundException("Event with id=" + eventId + " was not found on user with id=" + eventInitiatorId);
+        }
         final Collection<EventRequest> requests = eventRequestRepository.findByEventId(eventId);
         return requests.stream()
                 .map(eventRequestDtoMapper::mapToResponseDto)
