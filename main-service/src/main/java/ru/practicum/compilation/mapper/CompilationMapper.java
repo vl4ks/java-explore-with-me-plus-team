@@ -8,10 +8,9 @@ import ru.practicum.event.model.Event;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class CompilationMapper {
-    public static CompilationDto toCompilationDto(Compilation compilation, Set<EventShortDto> listEventDto) {
+    public static CompilationDto toCompilationDto(Compilation compilation, List<EventShortDto> listEventDto) {
         return CompilationDto.builder()
                 .id(compilation.getId())
                 .events(listEventDto)

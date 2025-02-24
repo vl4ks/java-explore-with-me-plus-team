@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.event.dto.EventShortDto;
 
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
@@ -14,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class CompilationDto {
 
-    private Set<EventShortDto> events;
+    private List<EventShortDto> events;
 
     private Long id;
 
