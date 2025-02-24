@@ -1,0 +1,37 @@
+package ru.practicum.category.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import ru.practicum.category.dto.CategoryDto;
+import ru.practicum.category.mapper.CategoryDtoMapper;
+import ru.practicum.category.model.Category;
+import ru.practicum.category.storage.CategoryRepository;
+import ru.practicum.exception.NotFoundException;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+@Service("categoryServiceImpl")
+@RequiredArgsConstructor
+public class CategoryServiceImpl implements CategoryService {
+    private final CategoryRepository categoryRepository;
+    private final CategoryDtoMapper categoryDtoMapper;
+
+    @Override
+    public Collection<CategoryDto> findAll(Integer from, Integer size) {
+        final Collection<Category> categories = categoryRepository.findAll(PageRequest.of(from / size, size)).getContent();
+        return categories.stream()
+                .map(categoryDtoMapper::mapToDto)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Override
+    public CategoryDto findById(Long categoryId) {
+        final Category category = categoryRepository.findById(categoryId).orElseThrow(
+                () -> new NotFoundException("Category with id=" + categoryId + " was not found")
+        );
+        return categoryDtoMapper.mapToDto(category);
+    }
+}
