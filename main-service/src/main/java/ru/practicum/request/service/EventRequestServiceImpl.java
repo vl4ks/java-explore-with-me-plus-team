@@ -2,7 +2,9 @@ package ru.practicum.request.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.service.EventService;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
@@ -11,6 +13,7 @@ import ru.practicum.request.mapper.EventRequestDtoMapper;
 import ru.practicum.request.model.EventRequest;
 import ru.practicum.request.model.EventRequestStatus;
 import ru.practicum.request.storage.EventRequestRepository;
+import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -33,11 +36,28 @@ public class EventRequestServiceImpl implements EventRequestService {
 
     @Override
     public ParticipationRequestDto create(Long userId, Long eventId) {
+        final UserDto user = userService.findById(userId);
+        if (user == null) {
+            throw new NotFoundException("User with id=" + userId + " was not found");
+        }
+        final EventFullDto event = eventService.findById(null, eventId);
+        if (event == null) {
+            throw new NotFoundException("Event with id=" + eventId + " was not found");
+        }
+        if (event.getInitiator().getId().equals(user.getId())) {
+            throw new ConflictException("Initiator of event can't be the same with requester");
+        }
+        if (!event.getState().equals("PUBLISHED")) {
+            throw new ConflictException("Can't send request to unpublished event");
+        }
+        if (event.getParticipantLimit() == null || event.getParticipantLimit() == 0 && event.getConfirmRequests() >= event.getConfirmRequests()) {
+            throw new ConflictException("Limit of event can't be full or not exist");
+        }
         final EventRequest request = new EventRequest(
                 null,
                 eventId,
                 userId,
-                EventRequestStatus.PENDING,
+                event.getRequestModeration() ? EventRequestStatus.CONFIRMED : EventRequestStatus.PENDING,
                 LocalDateTime.now()
         );
         final EventRequest createdRequest = eventRequestRepository.save(request);
