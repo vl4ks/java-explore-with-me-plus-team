@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 
 @Component
 public class EventRequestDtoMapper {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-ddTHH:mm:ss.SSS");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     public ParticipationRequestDto mapToResponseDto(EventRequest eventRequest) {
         final ParticipationRequestDto participationRequestDto = new ParticipationRequestDto(
