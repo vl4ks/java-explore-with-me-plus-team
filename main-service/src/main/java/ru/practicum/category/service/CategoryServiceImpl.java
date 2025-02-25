@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.dto.CategoryDto;
+import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.mapper.CategoryDtoMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.storage.CategoryRepository;
@@ -20,6 +21,13 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryDtoMapper categoryDtoMapper;
 
     @Override
+    public CategoryDto create(NewCategoryDto newCategoryDto) {
+        final Category category = categoryDtoMapper.mapFromDto(newCategoryDto);
+        final Category createdCategory = categoryRepository.save(category);
+        return categoryDtoMapper.mapToDto(createdCategory);
+    }
+
+    @Override
     public Collection<CategoryDto> findAll(Integer from, Integer size) {
         final Collection<Category> categories = categoryRepository.findAll(PageRequest.of(from / size, size)).getContent();
         return categories.stream()
@@ -33,5 +41,24 @@ public class CategoryServiceImpl implements CategoryService {
                 () -> new NotFoundException("Category with id=" + categoryId + " was not found")
         );
         return categoryDtoMapper.mapToDto(category);
+    }
+
+    @Override
+    public CategoryDto update(Long categoryId, CategoryDto categoryDto) {
+        final Category category = categoryRepository.findById(categoryId).orElseThrow(
+                () -> new NotFoundException("Category with id=" + categoryId + " was not found")
+        );
+        category.setName(categoryDto.getName());
+        final Category updatedCategory = categoryRepository.save(category);
+        return categoryDtoMapper.mapToDto(updatedCategory);
+
+    }
+
+    @Override
+    public void delete(Long categoryId) {
+        final Category category = categoryRepository.findById(categoryId).orElseThrow(
+                () -> new NotFoundException("Category with id=" + categoryId + " was not found")
+        );
+        categoryRepository.delete(category);
     }
 }

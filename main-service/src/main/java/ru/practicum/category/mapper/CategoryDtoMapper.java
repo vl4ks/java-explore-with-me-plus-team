@@ -22,4 +22,12 @@ public class CategoryDtoMapper {
         );
         return category;
     }
+
+    public Category mapFromDto(CategoryDto categoryDto) {
+        final Category category = new Category(
+                null,
+                categoryDto.getName()
+        );
+        return category;
+    }
 }
