@@ -29,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Collection<CategoryDto> findAll(Integer from, Integer size) {
-        final Collection<Category> categories = categoryRepository.findAll(PageRequest.of(from / size, size)).getContent();
+        final Collection<Category> categories = categoryRepository.findAll(PageRequest.of(from, size)).getContent();
         return categories.stream()
                 .map(categoryDtoMapper::mapToDto)
                 .collect(Collectors.toCollection(ArrayList::new));

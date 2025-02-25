@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.sql.SQLException;
+
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
@@ -14,6 +16,17 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleConflict(final ConflictException e) {
+        log.info("409 {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Integrity constraint has been violated.",
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleConflict(final SQLException e) {
         log.info("409 {}", e.getMessage(), e);
         return new ApiError(
                 HttpStatus.CONFLICT.value(),

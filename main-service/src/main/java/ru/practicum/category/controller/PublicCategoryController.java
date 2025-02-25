@@ -19,8 +19,8 @@ public class PublicCategoryController {
 
     @GetMapping
     public Collection<CategoryDto> get(
-            @RequestParam(required = false) @PositiveOrZero Integer from,
-            @RequestParam(required = false) @Positive Integer size
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(required = false, defaultValue = "10") @Positive Integer size
     ) {
         log.info("Пришел GET запрос /categories?from={}&size={}", from, size);
         final Collection<CategoryDto> categories = categoryService.findAll(from, size);

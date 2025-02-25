@@ -1,6 +1,8 @@
 package ru.practicum.category.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +19,7 @@ public class AdminCategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto create(@RequestBody NewCategoryDto newCategoryDto) {
+    public CategoryDto create(@RequestBody @Valid NewCategoryDto newCategoryDto) {
         log.info("Пришел POST запрос /admin/categories с телом {}", newCategoryDto);
         final CategoryDto createdCategory = categoryService.create(newCategoryDto);
         log.info("Отправлен ответ POST /admin/categories с телом {}", createdCategory);
@@ -25,7 +27,7 @@ public class AdminCategoryController {
     }
 
     @PatchMapping("/{categoryId}")
-    public CategoryDto update(@PathVariable Long categoryId, @RequestBody CategoryDto categoryDto) {
+    public CategoryDto update(@PathVariable Long categoryId, @RequestBody @Valid CategoryDto categoryDto) {
         log.info("Пришел PATCH запрос /admin/categories/{} с телом {}", categoryId, categoryDto);
         final CategoryDto updatedCategory = categoryService.update(categoryId, categoryDto);
         log.info("Отправлен ответ PATCH /admin/categories/{} с телом {}", categoryId, updatedCategory);
