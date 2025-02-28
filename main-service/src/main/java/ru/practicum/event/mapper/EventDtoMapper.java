@@ -68,7 +68,7 @@ public class EventDtoMapper {
         return eventShortDto;
     }
 
-    public Event mapFromDto (
+    public Event mapFromDto(
             NewEventDto newEventDto,
             Category category,
             Location location,
@@ -94,7 +94,7 @@ public class EventDtoMapper {
         return event;
     }
 
-    public void updateFromDto (
+    public void updateFromDto(
             Event event,
             UpdateEventUserRequest eventDto,
             Category category,
@@ -135,7 +135,7 @@ public class EventDtoMapper {
         }
     }
 
-    public void updateFromDto (
+    public void updateFromDto(
             Event event,
             UpdateEventAdminRequest eventDto,
             Category category,
