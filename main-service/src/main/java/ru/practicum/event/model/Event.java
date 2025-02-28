@@ -27,13 +27,13 @@ public class Event {
     @JoinColumn(name = "initiator_id")
     private User initiator;
 
-    @Column(name = "title")
+    @Column(name = "title", length = 120)
     private String title;
 
-    @Column(name = "annotation")
+    @Column(name = "annotation", length = 2000)
     private String annotation;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 7000)
     private String description;
 
     @ManyToOne
@@ -59,7 +59,7 @@ public class Event {
     @Column(name = "confirmedRequests")
     private Long confirmedRequests;
 
-    @Column(name = "state")
+    @Column(name = "state", length = 50)
     @Enumerated(EnumType.STRING)
     private State state;
 
