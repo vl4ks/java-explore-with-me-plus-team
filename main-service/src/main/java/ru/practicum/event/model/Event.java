@@ -2,19 +2,70 @@ package ru.practicum.event.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import ru.practicum.category.model.Category;
+import ru.practicum.location.model.Location;
+import ru.practicum.user.model.User;
 
-@Data
+import java.time.LocalDateTime;
+
 @Entity
-@Builder
+@Table(name = "events")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "events")
+@EqualsAndHashCode(of = { "id" })
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "initiator_id")
+    private User initiator;
+
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "annotation")
+    private String annotation;
+
+    @Column(name = "description")
+    private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "location_id")
+    private Location location;
+
+    @Column(name = "event_date")
+    private LocalDateTime eventDate;
+
+    @Column(name = "paid")
+    private Boolean paid;
+
+    @Column(name = "request_moderation")
+    private Boolean requestModeration;
+
+    @Column(name = "participant_limit")
+    private Long participantLimit;
+
+    @Column(name = "confirmedRequests")
+    private Long confirmedRequests;
+
+    @Column(name = "state")
+    @Enumerated(EnumType.STRING)
+    private State state;
+
+    @Column(name = "createdOn")
+    private LocalDateTime createdOn;
+
+    @Column(name = "published_on")
+    private LocalDateTime publishedOn;
 }

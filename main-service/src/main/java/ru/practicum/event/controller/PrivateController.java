@@ -1,6 +1,8 @@
 package ru.practicum.event.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -8,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.UpdateEventUserAndAdminRequest;
+import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.service.EventService;
 
 import java.util.Collection;
@@ -23,11 +25,11 @@ public class PrivateController {
     @GetMapping
     public Collection<EventShortDto> get(
             @PathVariable Long userId,
-            @RequestParam(required = false) Long from,
-            @RequestParam(required = false) Long size
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(required = false, defaultValue = "10") @Positive Integer size
     ) {
         log.info("Пришел GET запрос /users/{}/events?from={}&size={}", userId, from, size);
-        final Collection<EventShortDto> events = eventService.getByPrivate(userId, from, size);
+        final Collection<EventShortDto> events = eventService.findAllByPrivate(userId, from, size);
         log.info("Отправлен ответ GET /users/{}/events?from={}&size={} с телом: {}", userId, from, size, events);
         return events;
     }
@@ -42,17 +44,17 @@ public class PrivateController {
     }
 
     @GetMapping("/{eventId}")
-    public EventFullDto findById(@PathVariable Long userId, Long eventId) {
+    public EventFullDto findById(@PathVariable Long userId, @PathVariable Long eventId) {
         log.info("Пришел GET запрос /users/{}/events/{}", userId, eventId);
-        final EventFullDto event = eventService.findById(userId, eventId);
+        final EventFullDto event = eventService.findById(userId, eventId, false);
         log.info("Отправлен ответ GET /users/{}/events/{} с телом: {}", userId, eventId, event);
         return event;
     }
 
     @PatchMapping("/{eventId}")
-    public EventFullDto update(@PathVariable Long userId, @PathVariable Long eventId, @RequestBody UpdateEventUserAndAdminRequest eventDto) {
+    public EventFullDto update(@PathVariable Long userId, @PathVariable Long eventId, @RequestBody @Valid UpdateEventUserRequest eventDto) {
         log.info("Пришел PATCH запрос /users/{}/events/{} с телом {}", userId, eventId, eventDto);
-        final EventFullDto event = eventService.update(userId, eventId, eventDto);
+        final EventFullDto event = eventService.updateByPrivate(userId, eventId, eventDto);
         log.info("Отправлен ответ PATCH /users/{}/events/{} с телом: {}", userId, eventId, event);
         return event;
     }

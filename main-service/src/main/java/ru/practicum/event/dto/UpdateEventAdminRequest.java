@@ -1,42 +1,38 @@
 package ru.practicum.event.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.event.model.Location;
 import ru.practicum.event.model.StateAction;
+import ru.practicum.location.dto.LocationDto;
 
-//Разница между UpdateEventUserRequest и UpdateEventAdminRequest только в стататусе stateAction
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateEventUserAndAdminRequest {
-
+public class UpdateEventAdminRequest {
+    @Size(min = 20, max = 2000, message = "Name should be from 20 to 2000 symbols")
     private String annotation;
 
     private Long category;
 
+    @Size(min = 20, max = 7000, message = "Name should be from 20 to 7000 symbols")
     private String description;
 
-    @JsonProperty("eventDate")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private String eventDate;
 
-    private Location location;
+    private LocationDto location;
 
     private Boolean paid;
 
-    @PositiveOrZero
-    private Integer participantLimit;
+    @PositiveOrZero(message = "Limit of participants can't be negative")
+    private Long participantLimit;
 
     private Boolean requestModeration;
 
     private StateAction stateAction;
 
+    @Size(min = 3, max = 120, message = "Name should be from 3 to 120 symbols")
     private String title;
 }

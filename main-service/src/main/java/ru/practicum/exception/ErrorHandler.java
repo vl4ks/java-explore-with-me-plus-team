@@ -25,6 +25,17 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError handleConflict(final ForbiddenException e) {
+        log.info("409 {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.FORBIDDEN.value(),
+                "For the requested operation the conditions are not met.",
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleConflict(final SQLException e) {
         log.info("409 {}", e.getMessage(), e);
