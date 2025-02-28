@@ -26,12 +26,12 @@ public class PublicController {
             @RequestParam(required = false) String rangeEnd,
             @RequestParam(required = false) Boolean onlyAvailable,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) Long from,
-            @RequestParam(required = false) Long size
+            @RequestParam(required = false) Integer from,
+            @RequestParam(required = false) Integer size
     ) {
         log.info("Пришел GET запрос /events с параметрами: text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, onlyAvailable={}, sort={}, from={}, size={}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
-        final Collection<EventShortDto> events = eventService.getByPublic(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+        final Collection<EventShortDto> events = eventService.findAllByPublic(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
         log.info("Отправлен ответ GET /events с телом: {}", events);
         return events;
     }
@@ -39,7 +39,7 @@ public class PublicController {
     @GetMapping("/{eventId}")
     public EventFullDto findById(@PathVariable Long eventId) {
         log.info("Пришел GET запрос /events/{}", eventId);
-        final EventFullDto event = eventService.findById(null, eventId);
+        final EventFullDto event = eventService.findById(null, eventId, true);
         log.info("Отправлен ответ GET /events/{} с телом: {}", eventId, event);
         return event;
     }

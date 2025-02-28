@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.UpdateEventUserAndAdminRequest;
+import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.service.EventService;
 
 import java.util.Collection;
@@ -24,20 +24,20 @@ public class AdminController {
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) String rangeStart,
             @RequestParam(required = false) String rangeEnd,
-            @RequestParam(required = false) Long from,
-            @RequestParam(required = false) Long size
+            @RequestParam(required = false) Integer from,
+            @RequestParam(required = false) Integer size
         ) {
         log.info("Пришел GET запрос /admin/events с параметрами: users={}, states={}, categories={}, rangeStart={}, rangeEnd={}, from={}, size={}",
                 users, states, categories, rangeStart, rangeEnd, from, size);
-        final Collection<EventFullDto> events = eventService.getByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        final Collection<EventFullDto> events = eventService.findAllByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
         log.info("Отправлен ответ GET /admin/events с телом: {}", events);
         return events;
     }
 
     @PatchMapping("/{eventId}")
-    public EventFullDto update(@PathVariable Long eventId, @RequestBody UpdateEventUserAndAdminRequest eventDto) {
+    public EventFullDto update(@PathVariable Long eventId, @RequestBody UpdateEventAdminRequest eventDto) {
         log.info("Пришел PATCH запрос /admin/events/{} с телом {}", eventId, eventDto);
-        final EventFullDto event = eventService.update(null, eventId, eventDto);
+        final EventFullDto event = eventService.updateByAdmin(eventId, eventDto);
         log.info("Отправлен ответ PATCH /admin/events/{} с телом: {}", eventId, event);
         return event;
     }
