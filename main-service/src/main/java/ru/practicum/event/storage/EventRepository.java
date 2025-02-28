@@ -50,4 +50,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             Boolean onlyAvailable,
             Pageable pageable
     );
+
+    List<Event> findAllByIdIn(List<Long> eventIds);
 }

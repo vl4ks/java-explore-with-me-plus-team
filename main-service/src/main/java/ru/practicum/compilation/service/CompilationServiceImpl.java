@@ -14,7 +14,7 @@ import ru.practicum.compilation.repository.CompilationRepository;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
-import ru.practicum.event.repository.EventRepository;
+import ru.practicum.event.storage.EventRepository;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.*;
@@ -39,7 +39,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         Set<Long> compilationEventIds = Optional.ofNullable(newCompilationDto.getEvents())
                 .orElse(Collections.emptySet());
-        List<Event> events = eventRepository.findAllById(new ArrayList<>(compilationEventIds));
+        List<Event> events = eventRepository.findAllByIdIn(new ArrayList<>(compilationEventIds));
         compilation.setEvents(new HashSet<>(events));
 
         Compilation savedCompilation = compilationRepository.save(compilation);
@@ -59,7 +59,7 @@ public class CompilationServiceImpl implements CompilationService {
         log.info("Обновление подборки c {}, на {}", updateCompilationRequest.toString(), compilation.toString());
         if (updateCompilationRequest.getEvents() != null) {
             Set<Long> eventIds = updateCompilationRequest.getEvents();
-            List<Event> events = eventRepository.findAllById(new ArrayList<>(eventIds));
+            List<Event> events = eventRepository.findAllByIdIn(new ArrayList<>(eventIds));
             compilation.setEvents(new HashSet<>(events));
             log.trace("Events = {}", compilation.getEvents());
         }
