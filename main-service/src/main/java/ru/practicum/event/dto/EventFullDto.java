@@ -18,7 +18,7 @@ public class EventFullDto {
 
     private Long confirmRequests;
 
-    private String createOn;
+    private String createdOn;
 
     private String description;
 

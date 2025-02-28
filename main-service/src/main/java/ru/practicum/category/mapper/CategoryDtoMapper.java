@@ -25,7 +25,7 @@ public class CategoryDtoMapper {
 
     public Category mapFromDto(CategoryDto categoryDto) {
         final Category category = new Category(
-                null,
+                categoryDto.getId(),
                 categoryDto.getName()
         );
         return category;
