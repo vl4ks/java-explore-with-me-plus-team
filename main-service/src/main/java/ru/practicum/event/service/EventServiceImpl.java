@@ -180,7 +180,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void validateUser(User user, User initiator) {
-        if (initiator.getId() != user.getId()) {
+        if (initiator.getId().equals(user.getId())) {
             throw new NotFoundException("Trying to change information not from initiator of event");
         }
     }
