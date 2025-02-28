@@ -6,7 +6,7 @@ import ru.practicum.location.model.Location;
 
 @Component
 public class LocationDtoMapper {
-    public LocationDto mapToDto (Location location) {
+    public LocationDto mapToDto(Location location) {
         final LocationDto locationDto = new LocationDto(
                 location.getLat(),
                 location.getLon()
