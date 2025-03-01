@@ -14,6 +14,7 @@ import ru.practicum.event.model.Event;
 import ru.practicum.event.model.State;
 import ru.practicum.event.model.StateAction;
 import ru.practicum.event.storage.EventRepository;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.location.dto.LocationDto;
@@ -68,7 +69,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Collection<EventShortDto> findAllByPublic(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size) {
-        final Collection<Event> events = eventRepository.findAllByPublic(text, categories, paid, LocalDateTime.parse(rangeStart, formatter), LocalDateTime.parse(rangeEnd, formatter), onlyAvailable, (Pageable) PageRequest.of(from, size));
+        final Collection<Event> events = eventRepository.findAllByPublic(text, categories, paid, rangeStart == null ? null : LocalDateTime.parse(rangeStart, formatter), rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, formatter), onlyAvailable, (Pageable) PageRequest.of(from, size));
         return events.stream()
                 .map(event -> eventDtoMapper.mapToShortDto(
                         event,
@@ -148,11 +149,13 @@ public class EventServiceImpl implements EventService {
         final Location location = saveLocation(eventDto.getLocation());
         eventDtoMapper.updateFromDto(event, eventDto, category, location);
 
+        final Event updatedEvent = eventRepository.save(event);
+
         return eventDtoMapper.mapToFullDto(
-                event,
-                categoryDtoMapper.mapToDto(event.getCategory()),
-                locationDtoMapper.mapToDto(event.getLocation()),
-                userDtoMapper.mapToShortDto(event.getInitiator()),
+                updatedEvent,
+                categoryDtoMapper.mapToDto(updatedEvent.getCategory()),
+                locationDtoMapper.mapToDto(updatedEvent.getLocation()),
+                userDtoMapper.mapToShortDto(updatedEvent.getInitiator()),
                 0L,
                 0L
         );
@@ -162,25 +165,30 @@ public class EventServiceImpl implements EventService {
     public EventFullDto updateByAdmin(Long eventId, UpdateEventAdminRequest eventDto) {
         final Event event = findEventById(eventId);
 
-        validateEventDateForAdmin(eventDto.getEventDate(), eventDto.getStateAction());
+        validateEventDateForAdmin(eventDto.getEventDate() == null ? event.getEventDate() : LocalDateTime.parse(eventDto.getEventDate(), formatter), eventDto.getStateAction());
         validateStatusForAdmin(event.getState(), eventDto.getStateAction());
 
         final Category category = findCategoryById(eventDto.getCategory());
         final Location location = saveLocation(eventDto.getLocation());
         eventDtoMapper.updateFromDto(event, eventDto, category, location);
+        if (eventDto.getStateAction().equals(StateAction.PUBLISH_EVENT)) {
+            event.setPublishedOn(LocalDateTime.now());
+        }
+
+        final Event updatedEvent = eventRepository.save(event);
 
         return eventDtoMapper.mapToFullDto(
-                event,
-                categoryDtoMapper.mapToDto(event.getCategory()),
-                locationDtoMapper.mapToDto(event.getLocation()),
-                userDtoMapper.mapToShortDto(event.getInitiator()),
+                updatedEvent,
+                categoryDtoMapper.mapToDto(updatedEvent.getCategory()),
+                locationDtoMapper.mapToDto(updatedEvent.getLocation()),
+                userDtoMapper.mapToShortDto(updatedEvent.getInitiator()),
                 0L,
                 0L
         );
     }
 
     private void validateUser(User user, User initiator) {
-        if (initiator.getId().equals(user.getId())) {
+        if (!initiator.getId().equals(user.getId())) {
             throw new NotFoundException("Trying to change information not from initiator of event");
         }
     }
@@ -191,18 +199,18 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void validateEventDateForAdmin(String eventDate, StateAction stateAction) {
-        if (eventDate != null && LocalDateTime.parse(eventDate, formatter).isBefore(LocalDateTime.now().plusHours(2))) {
+    private void validateEventDateForAdmin(LocalDateTime eventDate, StateAction stateAction) {
+        if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ForbiddenException("Event date should be early than 2 hours than current moment");
         }
-        if (stateAction.equals(StateAction.PUBLISH_EVENT) && eventDate != null && LocalDateTime.parse(eventDate, formatter).isBefore(LocalDateTime.now().plusHours(1))) {
+        if (stateAction.equals(StateAction.PUBLISH_EVENT) && eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
             throw new ForbiddenException("Event date should be early than 1 hours than publish moment");
         }
     }
 
     private void validateStatusForPrivate(State state, StateAction stateAction) {
         if (state.equals(State.PUBLISHED)) {
-            throw new ForbiddenException("Can't change event not cancelled or in moderation");
+            throw new ConflictException("Can't change event not cancelled or in moderation");
         }
         switch (stateAction) {
             case null:
@@ -216,12 +224,14 @@ public class EventServiceImpl implements EventService {
 
     private void validateStatusForAdmin(State state, StateAction stateAction) {
         if (!state.equals(State.PENDING) && stateAction.equals(StateAction.PUBLISH_EVENT)) {
-            throw new ForbiddenException("Can't publish not pending event");
+            throw new ConflictException("Can't publish not pending event");
         }
-        if (!state.equals(State.PUBLISHED) && stateAction.equals(StateAction.REJECT_EVENT)) {
-            throw new ForbiddenException("Can't reject already published event");
+        if (state.equals(State.PUBLISHED) && stateAction.equals(StateAction.REJECT_EVENT)) {
+            throw new ConflictException("Can't reject already published event");
         }
-        throw new ForbiddenException("Unknown state action");
+        if (!stateAction.equals(StateAction.REJECT_EVENT) && !stateAction.equals(StateAction.PUBLISH_EVENT)) {
+            throw new ForbiddenException("Unknown state action");
+        }
     }
 
     private User findUserById(Long userId) {
