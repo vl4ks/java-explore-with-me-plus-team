@@ -54,8 +54,8 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Transactional
     @Override
-    public CompilationDto updateCompilation(Long id, UpdateCompilationRequest updateCompilationRequest) {
-        Compilation compilation = validateCompilation(id);
+    public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest updateCompilationRequest) {
+        Compilation compilation = validateCompilation(compId);
         log.info("Обновление подборки c {}, на {}", updateCompilationRequest.toString(), compilation.toString());
         if (updateCompilationRequest.getEvents() != null) {
             Set<Long> eventIds = updateCompilationRequest.getEvents();
@@ -113,9 +113,9 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public CompilationDto findCompilationById(Long id) {
-        log.info("Получение подборки с id={}", id);
-        Compilation compilation = validateCompilation(id);
+    public CompilationDto findCompilationById(Long compId) {
+        log.info("Получение подборки с compId={}", compId);
+        Compilation compilation = validateCompilation(compId);
         log.info("Подборка найдена: {}", compilation);
 
         List<EventShortDto> eventShortDtos = compilation.getEvents().stream()
