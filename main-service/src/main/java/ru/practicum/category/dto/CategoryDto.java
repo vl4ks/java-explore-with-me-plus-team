@@ -1,22 +1,19 @@
-package ru.practicum.cadegory.dto;
+package ru.practicum.category.dto;
 
-import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryDto {
 
     private Long id;
 
-    @NotBlank
-    @Size(min = 1, max = 50, message = "Название категории должно быть от 1 до 50 симоволов.")
+    @NotBlank(message = "Name can't be empty")
+    @Size(min = 1, max = 50, message = "Name should be from 1 to 50 symbols")
     private String name;
 }

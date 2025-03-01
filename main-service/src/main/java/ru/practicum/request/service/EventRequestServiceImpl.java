@@ -88,7 +88,7 @@ public class EventRequestServiceImpl implements EventRequestService {
                 () -> new NotFoundException("Request with id=" + requestId + " was not found")
         );
         if (!userId.equals(request.getRequesterId())) {
-            new NotFoundException("Not owner (userId=" + userId + ") of request trying to cancel it (request=" + request + ")");
+            throw new NotFoundException("Not owner (userId=" + userId + ") of request trying to cancel it (request=" + request + ")");
         }
         updateStatus(requestId, EventRequestStatus.CANCELLED);
         return eventRequestDtoMapper.mapToResponseDto(request);
