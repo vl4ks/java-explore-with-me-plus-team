@@ -21,6 +21,8 @@ public class EventFullDto {
 
     private String createdOn;
 
+    private String publishedOn;
+
     private String description;
 
     private String evtntDate;

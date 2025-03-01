@@ -32,6 +32,7 @@ public class EventDtoMapper {
                 categoryDto,
                 confirmRequests,
                 event.getCreatedOn().format(formatter),
+                event.getPublishedOn() == null ? null : event.getPublishedOn().format(formatter),
                 event.getDescription(),
                 event.getEventDate().format(formatter),
                 event.getId(),
@@ -159,10 +160,10 @@ public class EventDtoMapper {
         if (eventDto.getRequestModeration() != null) {
             event.setRequestModeration(eventDto.getRequestModeration());
         }
-        if (eventDto.getStateAction() != null && eventDto.getStateAction() == StateAction.SEND_TO_REVIEW) {
-            event.setState(State.PENDING);
+        if (eventDto.getStateAction() != null && eventDto.getStateAction() == StateAction.PUBLISH_EVENT) {
+            event.setState(State.PUBLISHED);
         }
-        if (eventDto.getStateAction() != null && eventDto.getStateAction() == StateAction.CANCEL_REVIEW) {
+        if (eventDto.getStateAction() != null && eventDto.getStateAction() == StateAction.REJECT_EVENT) {
             event.setState(State.CANCELED);
         }
         if (eventDto.getTitle() != null) {

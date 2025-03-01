@@ -26,8 +26,8 @@ public class PublicController {
             @RequestParam(required = false) String rangeEnd,
             @RequestParam(required = false) Boolean onlyAvailable,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) Integer from,
-            @RequestParam(required = false) Integer size
+            @RequestParam(required = false, defaultValue = "0") Integer from,
+            @RequestParam(required = false, defaultValue = "10") Integer size
     ) {
         log.info("Пришел GET запрос /events с параметрами: text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, onlyAvailable={}, sort={}, from={}, size={}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
