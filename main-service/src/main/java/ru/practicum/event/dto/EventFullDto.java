@@ -25,7 +25,7 @@ public class EventFullDto {
 
     private String description;
 
-    private String evtntDate;
+    private String eventDate;
 
     private Long id;
 
