@@ -35,22 +35,31 @@ public class EventRequestServiceImpl implements EventRequestService {
     public ParticipationRequestDto create(Long userId, Long eventId) {
         final UserDto user = userService.findById(userId);
         final EventFullDto event = eventService.findById(userId, eventId, false);
+        final EventRequest foundOldRequest = eventRequestRepository.findByEventIdAndRequesterId(eventId, userId);
+        if (foundOldRequest != null) {
+            throw new ConflictException("Trying to create already exist request");
+        }
 
         if (event.getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Initiator of event can't be the same with requester");
         }
         validateEventForRequest(event);
 
+        EventRequestStatus status = event.getParticipantLimit().equals(0L) || !event.getRequestModeration() ?
+                EventRequestStatus.CONFIRMED : EventRequestStatus.PENDING;
+
         final EventRequest request = new EventRequest(
                 null,
                 eventId,
                 userId,
-                event.getRequestModeration() ?
-                        event.getConfirmedRequests() >= event.getParticipantLimit() ? EventRequestStatus.CANCELED : EventRequestStatus.PENDING
-                        : EventRequestStatus.CONFIRMED,
+                status,
                 LocalDateTime.now()
         );
         final EventRequest createdRequest = eventRequestRepository.save(request);
+        if (status.equals(EventRequestStatus.CONFIRMED)) {
+            eventService.updateEventConfirmedRequests(event.getId(), event.getConfirmedRequests() + 1);
+        }
+
         return eventRequestDtoMapper.mapToResponseDto(createdRequest);
     }
 
@@ -62,6 +71,7 @@ public class EventRequestServiceImpl implements EventRequestService {
         if (!event.getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Not initiator of event can't be change status of requests");
         }
+        validateEventForRequest(event);
 
         EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
         final Collection<EventRequest> requests = eventRequestRepository.findById(requestsToUpdate.getRequestIds());
@@ -118,11 +128,11 @@ public class EventRequestServiceImpl implements EventRequestService {
         if (!event.getState().equals(State.PUBLISHED)) {
             throw new ConflictException("Can't send request to unpublished event");
         }
-        if (!event.getRequestModeration()) {
+        if (event.getParticipantLimit().equals(0L)) {
             return;
         }
-        if (event.getParticipantLimit() == null || event.getParticipantLimit() == 0 || event.getConfirmedRequests() >= event.getParticipantLimit()) {
-            throw new ConflictException("Limit of event can't be full or not exist");
+        if (event.getConfirmedRequests() >= event.getParticipantLimit()) {
+            throw new ConflictException("Limit of event can't be full");
         }
     }
 
@@ -144,10 +154,6 @@ public class EventRequestServiceImpl implements EventRequestService {
 
     private void confirmRequests(EventRequestStatusUpdateResult result, EventFullDto event, Collection<EventRequest> requests) {
         final Long limit = event.getParticipantLimit();
-
-        if (event.getRequestModeration().equals(false) || limit == null || limit == 0) {
-            return;
-        }
 
         Long currentConfirmed = event.getConfirmedRequests();
         for (EventRequest request : requests) {

@@ -34,7 +34,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             SELECT e
             FROM Event AS e
             WHERE e.state = PUBLISHED
-                AND (?1 IS NULL or e.annotation ILIKE '%' || ?1 || '%' or e.description ILIKE '%' || ?1 || '%')
+                AND (?1 IS NULL or e.annotation ILIKE %?1% or e.description ILIKE %?1%)
                 AND (?2 IS NULL or e.category.id in ?2)
                 AND (?3 IS NULL or e.paid = ?3)
                 AND (CAST(?4 AS timestamp) IS NULL and e.eventDate >= CURRENT_TIMESTAMP or e.eventDate >= ?4)

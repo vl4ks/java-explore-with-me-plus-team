@@ -69,10 +69,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Collection<EventShortDto> findAllByPublic(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size) {
-        if (LocalDateTime.parse(rangeStart, formatter).isAfter(LocalDateTime.parse(rangeEnd, formatter))) {
+        if (rangeStart != null && rangeEnd != null && LocalDateTime.parse(rangeStart, formatter).isAfter(LocalDateTime.parse(rangeEnd, formatter))) {
             throw new IncorrectRequestException("RangeStart is after Range End");
         }
-        if (!sort.equals("EVENT_DATE") && !sort.equals("VIEWS")) {
+        if (sort != null && !sort.equals("EVENT_DATE") && !sort.equals("VIEWS")) {
             throw new IncorrectRequestException("Unknown sort type");
         }
         final Collection<Event> events = eventRepository.findAllByPublic(text, categories, paid, rangeStart == null ? null : LocalDateTime.parse(rangeStart, formatter), rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, formatter), onlyAvailable, (Pageable) PageRequest.of(from, size));
@@ -105,7 +105,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Collection<EventFullDto> findAllByAdmin(List<Long> users, List<String> states, List<Long> categories, String rangeStart, String rangeEnd, Integer from, Integer size) {
-        final Collection<Event> events = eventRepository.findAllByAdmin(users, states, categories, LocalDateTime.parse(rangeStart, formatter), LocalDateTime.parse(rangeEnd, formatter), (Pageable) PageRequest.of(from, size));
+        final Collection<Event> events = eventRepository.findAllByAdmin(users, states, categories, rangeStart == null ? null : LocalDateTime.parse(rangeStart, formatter), rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, formatter), (Pageable) PageRequest.of(from, size));
         return events.stream()
                 .map(event -> eventDtoMapper.mapToFullDto(
                         event,

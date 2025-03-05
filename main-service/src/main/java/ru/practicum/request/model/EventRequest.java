@@ -27,6 +27,7 @@ public class EventRequest {
     private Long requesterId;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private EventRequestStatus status;
 
     @Column(name = "created")
