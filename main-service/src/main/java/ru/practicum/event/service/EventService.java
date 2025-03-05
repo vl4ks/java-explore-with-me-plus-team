@@ -20,4 +20,6 @@ public interface EventService {
     public EventFullDto updateByPrivate(Long userId, Long eventId, UpdateEventUserRequest eventDto);
 
     public EventFullDto updateByAdmin(Long eventId, UpdateEventAdminRequest eventDto);
+
+    public void updateEventConfirmedRequests(Long eventId, Long confirmedRequests);
 }

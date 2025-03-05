@@ -34,7 +34,7 @@ public class NewEventDto {
     @PositiveOrZero(message = "Limit of participants can't be negative")
     private Long participantLimit = 0L;
 
-    private Boolean requestModeration = false;
+    private Boolean requestModeration = true;
 
     @NotBlank(message = "Title can't be empty")
     @Size(min = 3, max = 120, message = "Name should be from 3 to 120 symbols")
