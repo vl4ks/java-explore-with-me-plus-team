@@ -27,7 +27,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiError handleConflict(final ForbiddenException e) {
-        log.info("409 {}", e.getMessage(), e);
+        log.info("403 {}", e.getMessage(), e);
         return new ApiError(
                 HttpStatus.FORBIDDEN.value(),
                 "For the requested operation the conditions are not met.",
@@ -53,6 +53,17 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.NOT_FOUND.value(),
                 "The required object was not found.",
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleIncorrectRequestException(final IncorrectRequestException e) {
+        log.info("400 {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                "Incorrectly made request.",
                 e.getMessage()
         );
     }

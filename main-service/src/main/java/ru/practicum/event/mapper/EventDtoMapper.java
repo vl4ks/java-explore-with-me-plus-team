@@ -24,13 +24,12 @@ public class EventDtoMapper {
             CategoryDto categoryDto,
             LocationDto locationDto,
             UserShortDto initiatorDto,
-            Long confirmRequests,
             Long views
     ) {
         final EventFullDto eventFullDto = new EventFullDto(
                 event.getAnnotation(),
                 categoryDto,
-                confirmRequests,
+                event.getConfirmedRequests(),
                 event.getCreatedOn().format(formatter),
                 event.getPublishedOn() == null ? null : event.getPublishedOn().format(formatter),
                 event.getDescription(),
@@ -52,13 +51,12 @@ public class EventDtoMapper {
             Event event,
             CategoryDto categoryDto,
             UserShortDto initiatorDto,
-            Long confirmRequests,
             Long views
     ) {
         final EventShortDto eventShortDto = new EventShortDto(
                 event.getAnnotation(),
                 categoryDto,
-                confirmRequests,
+                event.getConfirmedRequests(),
                 event.getEventDate().format(formatter),
                 event.getId(),
                 initiatorDto,

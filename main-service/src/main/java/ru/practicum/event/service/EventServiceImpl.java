@@ -16,6 +16,7 @@ import ru.practicum.event.model.StateAction;
 import ru.practicum.event.storage.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ForbiddenException;
+import ru.practicum.exception.IncorrectRequestException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.location.dto.LocationDto;
 import ru.practicum.location.mapper.LocationDtoMapper;
@@ -62,23 +63,28 @@ public class EventServiceImpl implements EventService {
                 categoryDtoMapper.mapToDto(event.getCategory()),
                 locationDtoMapper.mapToDto(event.getLocation()),
                 userDtoMapper.mapToShortDto(event.getInitiator()),
-                0L,
                 0L
             );
     }
 
     @Override
     public Collection<EventShortDto> findAllByPublic(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size) {
+        if (LocalDateTime.parse(rangeStart, formatter).isAfter(LocalDateTime.parse(rangeEnd, formatter))) {
+            throw new IncorrectRequestException("RangeStart is after Range End");
+        }
+        if (!sort.equals("EVENT_DATE") && !sort.equals("VIEWS")) {
+            throw new IncorrectRequestException("Unknown sort type");
+        }
         final Collection<Event> events = eventRepository.findAllByPublic(text, categories, paid, rangeStart == null ? null : LocalDateTime.parse(rangeStart, formatter), rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, formatter), onlyAvailable, (Pageable) PageRequest.of(from, size));
         return events.stream()
                 .map(event -> eventDtoMapper.mapToShortDto(
                         event,
                         categoryDtoMapper.mapToDto(event.getCategory()),
                         userDtoMapper.mapToShortDto(event.getInitiator()),
-                        null,
                         null
 
                 ))
+//                .sorted(Comparator.comparing(event -> sort.equals("event_date") ? event.getEventDate() : event.getViews()))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -91,7 +97,6 @@ public class EventServiceImpl implements EventService {
                         event,
                         categoryDtoMapper.mapToDto(event.getCategory()),
                         userDtoMapper.mapToShortDto(event.getInitiator()),
-                        null,
                         null
 
                 ))
@@ -107,7 +112,6 @@ public class EventServiceImpl implements EventService {
                         categoryDtoMapper.mapToDto(event.getCategory()),
                         locationDtoMapper.mapToDto(event.getLocation()),
                         userDtoMapper.mapToShortDto(event.getInitiator()),
-                        null,
                         null
 
                 ))
@@ -131,7 +135,6 @@ public class EventServiceImpl implements EventService {
                 categoryDtoMapper.mapToDto(event.getCategory()),
                 locationDtoMapper.mapToDto(event.getLocation()),
                 userDtoMapper.mapToShortDto(event.getInitiator()),
-                0L,
                 0L
         );
     }
@@ -156,7 +159,6 @@ public class EventServiceImpl implements EventService {
                 categoryDtoMapper.mapToDto(updatedEvent.getCategory()),
                 locationDtoMapper.mapToDto(updatedEvent.getLocation()),
                 userDtoMapper.mapToShortDto(updatedEvent.getInitiator()),
-                0L,
                 0L
         );
     }
@@ -171,7 +173,7 @@ public class EventServiceImpl implements EventService {
         final Category category = findCategoryById(eventDto.getCategory());
         final Location location = saveLocation(eventDto.getLocation());
         eventDtoMapper.updateFromDto(event, eventDto, category, location);
-        if (eventDto.getStateAction().equals(StateAction.PUBLISH_EVENT)) {
+        if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(StateAction.PUBLISH_EVENT)) {
             event.setPublishedOn(LocalDateTime.now());
         }
 
@@ -182,9 +184,15 @@ public class EventServiceImpl implements EventService {
                 categoryDtoMapper.mapToDto(updatedEvent.getCategory()),
                 locationDtoMapper.mapToDto(updatedEvent.getLocation()),
                 userDtoMapper.mapToShortDto(updatedEvent.getInitiator()),
-                0L,
                 0L
         );
+    }
+
+    @Override
+    public void updateEventConfirmedRequests(Long eventId, Long confirmedRequests) {
+        final Event event = findEventById(eventId);
+        event.setConfirmedRequests(confirmedRequests);
+        eventRepository.save(event);
     }
 
     private void validateUser(User user, User initiator) {
@@ -195,15 +203,15 @@ public class EventServiceImpl implements EventService {
 
     private void validateEventDate(String eventDate) {
         if (eventDate != null && LocalDateTime.parse(eventDate, formatter).isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ForbiddenException("Event date should be early than 2 hours than current moment " + eventDate + " " + LocalDateTime.parse(eventDate, formatter));
+            throw new IncorrectRequestException("Event date should be early than 2 hours than current moment " + eventDate + " " + LocalDateTime.parse(eventDate, formatter));
         }
     }
 
     private void validateEventDateForAdmin(LocalDateTime eventDate, StateAction stateAction) {
         if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ForbiddenException("Event date should be early than 2 hours than current moment");
+            throw new IncorrectRequestException("Event date should be early than 2 hours than current moment");
         }
-        if (stateAction.equals(StateAction.PUBLISH_EVENT) && eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
+        if (stateAction != null && stateAction.equals(StateAction.PUBLISH_EVENT) && eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
             throw new ForbiddenException("Event date should be early than 1 hours than publish moment");
         }
     }
@@ -229,7 +237,7 @@ public class EventServiceImpl implements EventService {
         if (state.equals(State.PUBLISHED) && stateAction.equals(StateAction.REJECT_EVENT)) {
             throw new ConflictException("Can't reject already published event");
         }
-        if (!stateAction.equals(StateAction.REJECT_EVENT) && !stateAction.equals(StateAction.PUBLISH_EVENT)) {
+        if (stateAction != null && !stateAction.equals(StateAction.REJECT_EVENT) && !stateAction.equals(StateAction.PUBLISH_EVENT)) {
             throw new ForbiddenException("Unknown state action");
         }
     }

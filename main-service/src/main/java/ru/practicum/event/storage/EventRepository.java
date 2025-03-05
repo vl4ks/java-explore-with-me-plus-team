@@ -50,4 +50,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             Boolean onlyAvailable,
             Pageable pageable
     );
+
+    @Query(value = """
+            UPDATE events
+            SET confirmedRequests = ?2
+            WHERE id = ?1
+        """,
+        nativeQuery = true
+    )
+    public void updateConfirmedRequests(Long eventId, Long confirmedRequests);
 }
