@@ -339,7 +339,6 @@ public class EventServiceImpl implements EventService {
                 .queryParam("end", end.format(formatter))
                 .queryParam("uris", uris)
                 .queryParam("unique", "true")
-                .encode()
                 .toUriString();
 
         final HttpMethod method = HttpMethod.GET;
