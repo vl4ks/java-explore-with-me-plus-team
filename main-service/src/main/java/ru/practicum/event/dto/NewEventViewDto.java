@@ -15,5 +15,5 @@ public class NewEventViewDto {
     private String app;
     private String uri;
     private String ip;
-    private LocalDateTime timestamp;
+    private String timestamp;
 }
