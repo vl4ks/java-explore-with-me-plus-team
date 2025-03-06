@@ -14,7 +14,7 @@ import java.util.List;
 
 
 public class StatsClient extends BaseClient {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @Value("${server.application.name:ewm-main-service}")
     private String appName;
