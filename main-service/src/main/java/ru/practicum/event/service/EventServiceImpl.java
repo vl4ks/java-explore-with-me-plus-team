@@ -61,7 +61,7 @@ public class EventServiceImpl implements EventService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    final DateTimeFormatter formatter_seconds = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    final DateTimeFormatter formatterSeconds = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     @Override
     public EventFullDto create(Long userId, NewEventDto eventDto) {
