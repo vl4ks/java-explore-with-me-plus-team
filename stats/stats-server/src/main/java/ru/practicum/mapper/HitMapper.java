@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 public class HitMapper {
 
     public static Hit mapToHit(CreateHitDto createHitDto) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
         return Hit.builder()
                 .app(createHitDto.getApp())
@@ -23,7 +23,7 @@ public class HitMapper {
     }
 
     public static ResponseHitDto mapToResponseDto(Hit hit) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
         return ResponseHitDto.builder()
                 .id(hit.getId())
