@@ -347,6 +347,8 @@ public class EventServiceImpl implements EventService {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         final HttpEntity<Object> requestBody = new HttpEntity<>(null, headers);
 
+        log.info(start.toString());
+        log.info(start.format(formatter));
         log.info(url);
 
         final ResponseEntity<String> response = restTemplate.exchange(url, method, requestBody, String.class);
