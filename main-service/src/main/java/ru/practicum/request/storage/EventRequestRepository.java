@@ -8,17 +8,16 @@ import java.util.Collection;
 
 public interface EventRequestRepository extends JpaRepository<EventRequest, Long> {
 
-    @Query(value = """
-            SELECT *
-            FROM requests AS r
-            WHERE requester_id = ?1
-                AND event_id = ?2
-        """,
-        nativeQuery = true
-    )
-    EventRequest findByRequesterAndEvent(Long requesterId, Long eventId);
-
     Collection<EventRequest> findByRequesterId(Long requesterId);
 
     Collection<EventRequest> findByEventId(Long eventId);
+
+    EventRequest findByEventIdAndRequesterId(Long eventId, Long requesterId);
+
+    @Query("""
+        SELECT r
+        FROM EventRequest AS r
+        WHERE id IN ?1
+    """)
+    Collection<EventRequest> findById(Collection<Long> requestsIds);
 }

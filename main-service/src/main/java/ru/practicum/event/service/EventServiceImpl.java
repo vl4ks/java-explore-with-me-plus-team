@@ -1,9 +1,17 @@
 package ru.practicum.event.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.mapper.CategoryDtoMapper;
 import ru.practicum.category.model.Category;
@@ -16,6 +24,7 @@ import ru.practicum.event.model.StateAction;
 import ru.practicum.event.storage.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ForbiddenException;
+import ru.practicum.exception.IncorrectRequestException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.location.dto.LocationDto;
 import ru.practicum.location.mapper.LocationDtoMapper;
@@ -33,9 +42,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service("eventServiceImpl")
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
+    private static final String APP_NAME = "main_svc";
+    private static final String STATS_SERVICE_SCHEME = "http";
+    private static final String STATS_SERVICE_HOST = "ewm-stats-server";
+    private static final Integer STATS_SERVICE_PORT = 9090;
     private final UserService userService;
     private final CategoryService categoryService;
     private final LocationService locationService;
@@ -44,6 +58,7 @@ public class EventServiceImpl implements EventService {
     private final UserDtoMapper userDtoMapper;
     private final CategoryDtoMapper categoryDtoMapper;
     private final LocationDtoMapper locationDtoMapper;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -62,23 +77,29 @@ public class EventServiceImpl implements EventService {
                 categoryDtoMapper.mapToDto(event.getCategory()),
                 locationDtoMapper.mapToDto(event.getLocation()),
                 userDtoMapper.mapToShortDto(event.getInitiator()),
-                0L,
                 0L
             );
     }
 
     @Override
-    public Collection<EventShortDto> findAllByPublic(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size) {
+    public Collection<EventShortDto> findAllByPublic(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size, HttpServletRequest request) {
+        if (rangeStart != null && rangeEnd != null && LocalDateTime.parse(rangeStart, formatter).isAfter(LocalDateTime.parse(rangeEnd, formatter))) {
+            throw new IncorrectRequestException("RangeStart is after Range End");
+        }
+        if (sort != null && !sort.equals("EVENT_DATE") && !sort.equals("VIEWS")) {
+            throw new IncorrectRequestException("Unknown sort type");
+        }
+        saveView(request);
         final Collection<Event> events = eventRepository.findAllByPublic(text, categories, paid, rangeStart == null ? null : LocalDateTime.parse(rangeStart, formatter), rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, formatter), onlyAvailable, (Pageable) PageRequest.of(from, size));
         return events.stream()
                 .map(event -> eventDtoMapper.mapToShortDto(
                         event,
                         categoryDtoMapper.mapToDto(event.getCategory()),
                         userDtoMapper.mapToShortDto(event.getInitiator()),
-                        null,
-                        null
+                        countViews(event.getId(), event.getCreatedOn(), LocalDateTime.now())
 
                 ))
+                .sorted((e1, e2) -> sort == null || sort.equals("EVENT_DATE") ? e1.getEventDate().compareTo(e2.getEventDate()) : e1.getViews().compareTo(e2.getViews()))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -91,8 +112,7 @@ public class EventServiceImpl implements EventService {
                         event,
                         categoryDtoMapper.mapToDto(event.getCategory()),
                         userDtoMapper.mapToShortDto(event.getInitiator()),
-                        null,
-                        null
+                        countViews(event.getId(), event.getCreatedOn(), LocalDateTime.now())
 
                 ))
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -100,28 +120,27 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Collection<EventFullDto> findAllByAdmin(List<Long> users, List<String> states, List<Long> categories, String rangeStart, String rangeEnd, Integer from, Integer size) {
-        final Collection<Event> events = eventRepository.findAllByAdmin(users, states, categories, LocalDateTime.parse(rangeStart, formatter), LocalDateTime.parse(rangeEnd, formatter), (Pageable) PageRequest.of(from, size));
+        final Collection<Event> events = eventRepository.findAllByAdmin(users, states, categories, rangeStart == null ? null : LocalDateTime.parse(rangeStart, formatter), rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, formatter), (Pageable) PageRequest.of(from, size));
         return events.stream()
                 .map(event -> eventDtoMapper.mapToFullDto(
                         event,
                         categoryDtoMapper.mapToDto(event.getCategory()),
                         locationDtoMapper.mapToDto(event.getLocation()),
                         userDtoMapper.mapToShortDto(event.getInitiator()),
-                        null,
-                        null
+                        countViews(event.getId(), event.getCreatedOn(), LocalDateTime.now())
 
                 ))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
-    public EventFullDto findById(Long userId, Long eventId, Boolean isPublic) {
+    public EventFullDto findById(Long userId, Long eventId, Boolean isPublic, HttpServletRequest request) {
         final Event event = findEventById(eventId);
 
         if (isPublic && !event.getState().equals(State.PUBLISHED)) {
             throw new NotFoundException("Event with id=" + eventId + " was not found");
         } else if (isPublic) {
-            // Сервис статистики
+            saveView(request);
         } else {
             findUserById(userId);
         }
@@ -131,8 +150,7 @@ public class EventServiceImpl implements EventService {
                 categoryDtoMapper.mapToDto(event.getCategory()),
                 locationDtoMapper.mapToDto(event.getLocation()),
                 userDtoMapper.mapToShortDto(event.getInitiator()),
-                0L,
-                0L
+                countViews(event.getId(), event.getCreatedOn(), LocalDateTime.now())
         );
     }
 
@@ -156,8 +174,7 @@ public class EventServiceImpl implements EventService {
                 categoryDtoMapper.mapToDto(updatedEvent.getCategory()),
                 locationDtoMapper.mapToDto(updatedEvent.getLocation()),
                 userDtoMapper.mapToShortDto(updatedEvent.getInitiator()),
-                0L,
-                0L
+                countViews(event.getId(), event.getCreatedOn(), LocalDateTime.now())
         );
     }
 
@@ -171,7 +188,7 @@ public class EventServiceImpl implements EventService {
         final Category category = findCategoryById(eventDto.getCategory());
         final Location location = saveLocation(eventDto.getLocation());
         eventDtoMapper.updateFromDto(event, eventDto, category, location);
-        if (eventDto.getStateAction().equals(StateAction.PUBLISH_EVENT)) {
+        if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(StateAction.PUBLISH_EVENT)) {
             event.setPublishedOn(LocalDateTime.now());
         }
 
@@ -182,9 +199,15 @@ public class EventServiceImpl implements EventService {
                 categoryDtoMapper.mapToDto(updatedEvent.getCategory()),
                 locationDtoMapper.mapToDto(updatedEvent.getLocation()),
                 userDtoMapper.mapToShortDto(updatedEvent.getInitiator()),
-                0L,
-                0L
+                countViews(event.getId(), event.getCreatedOn(), LocalDateTime.now())
         );
+    }
+
+    @Override
+    public void updateEventConfirmedRequests(Long eventId, Long confirmedRequests) {
+        final Event event = findEventById(eventId);
+        event.setConfirmedRequests(confirmedRequests);
+        eventRepository.save(event);
     }
 
     private void validateUser(User user, User initiator) {
@@ -195,15 +218,15 @@ public class EventServiceImpl implements EventService {
 
     private void validateEventDate(String eventDate) {
         if (eventDate != null && LocalDateTime.parse(eventDate, formatter).isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ForbiddenException("Event date should be early than 2 hours than current moment " + eventDate + " " + LocalDateTime.parse(eventDate, formatter));
+            throw new IncorrectRequestException("Event date should be early than 2 hours than current moment " + eventDate + " " + LocalDateTime.parse(eventDate, formatter));
         }
     }
 
     private void validateEventDateForAdmin(LocalDateTime eventDate, StateAction stateAction) {
         if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ForbiddenException("Event date should be early than 2 hours than current moment");
+            throw new IncorrectRequestException("Event date should be early than 2 hours than current moment");
         }
-        if (stateAction.equals(StateAction.PUBLISH_EVENT) && eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
+        if (stateAction != null && stateAction.equals(StateAction.PUBLISH_EVENT) && eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
             throw new ForbiddenException("Event date should be early than 1 hours than publish moment");
         }
     }
@@ -229,7 +252,7 @@ public class EventServiceImpl implements EventService {
         if (state.equals(State.PUBLISHED) && stateAction.equals(StateAction.REJECT_EVENT)) {
             throw new ConflictException("Can't reject already published event");
         }
-        if (!stateAction.equals(StateAction.REJECT_EVENT) && !stateAction.equals(StateAction.PUBLISH_EVENT)) {
+        if (stateAction != null && !stateAction.equals(StateAction.REJECT_EVENT) && !stateAction.equals(StateAction.PUBLISH_EVENT)) {
             throw new ForbiddenException("Unknown state action");
         }
     }
@@ -264,5 +287,72 @@ public class EventServiceImpl implements EventService {
         );
 
         return event;
+    }
+
+    private void saveView(HttpServletRequest request) {
+        final String url = UriComponentsBuilder.newInstance()
+                .scheme(STATS_SERVICE_SCHEME)
+                .host(STATS_SERVICE_HOST)
+                .port(STATS_SERVICE_PORT)
+                .path("/hit")
+                .toUriString();
+
+        final NewEventViewDto viewDto = new NewEventViewDto().builder()
+                .app(APP_NAME)
+                .uri(request.getRequestURI())
+                .ip(request.getRemoteAddr())
+                .timestamp(LocalDateTime.now().format(formatter))
+                .build();
+
+        final HttpMethod method = HttpMethod.POST;
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        final HttpEntity<Object> requestBody = new HttpEntity<>(viewDto, headers);
+
+        log.info(url);
+        log.info(requestBody.toString());
+
+        restTemplate.exchange(url, method, requestBody, Object.class);
+    }
+
+    private Long countViews(Long eventId, LocalDateTime start, LocalDateTime end) {
+        final List<String> uris = List.of(
+                "/events/" + eventId
+        );
+        final String url = UriComponentsBuilder.newInstance()
+                .scheme(STATS_SERVICE_SCHEME)
+                .host(STATS_SERVICE_HOST)
+                .port(STATS_SERVICE_PORT)
+                .path("/stats")
+                .queryParam("start", start)
+                .queryParam("end", end)
+                .queryParam("uris", uris)
+                .toUriString();
+
+        final HttpMethod method = HttpMethod.GET;
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        final HttpEntity<Object> requestBody = new HttpEntity<>(null, headers);
+
+        log.info(url);
+
+        final ResponseEntity<String> response = restTemplate.exchange(url, method, requestBody, String.class);
+
+        log.info(response.getStatusCode().toString());
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            return 0L;
+        }
+
+        Long sumOfViews = 0L;
+        JsonArray jsonArray = (JsonArray) JsonParser.parseString(response.getBody());
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JsonObject jsonObject = (JsonObject) jsonArray.get(i);
+            sumOfViews += jsonObject.get("hits").getAsLong();
+        }
+
+        return sumOfViews;
     }
 }

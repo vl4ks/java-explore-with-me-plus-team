@@ -1,11 +1,14 @@
 package ru.practicum.request.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.request.model.EventRequestStatus;
 
-@lombok.Data
-@lombok.AllArgsConstructor
-@lombok.NoArgsConstructor
-public class ParticipationRequestDto {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class  ParticipationRequestDto {
     private String created;
 
     private Long event;
