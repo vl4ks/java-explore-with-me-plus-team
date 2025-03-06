@@ -78,7 +78,7 @@ public class EventServiceImpl implements EventService {
                 locationDtoMapper.mapToDto(event.getLocation()),
                 userDtoMapper.mapToShortDto(event.getInitiator()),
                 0L
-            );
+        );
     }
 
     @Override
@@ -310,10 +310,20 @@ public class EventServiceImpl implements EventService {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         final HttpEntity<Object> requestBody = new HttpEntity<>(viewDto, headers);
 
-        log.info(url);
-        log.info(requestBody.toString());
+        log.info("Отправка запроса в сервис статистики: {}", url);
+        log.info("Тело запроса: {}", requestBody);
 
-        restTemplate.exchange(url, method, requestBody, Object.class);
+        try {
+            ResponseEntity<Object> response = restTemplate.exchange(url, method, requestBody, Object.class);
+
+            if (response.getStatusCode() == HttpStatus.CREATED) {
+                log.info("Просмотр успешно записанного события.");
+            } else {
+                log.error("Ошибка при сохранении просмотра. Код ответа: {}", response.getStatusCode());
+            }
+        } catch (Exception e) {
+            log.error("Exception: {}", e.getMessage(), e);
+        }
     }
 
     private Long countViews(Long eventId, LocalDateTime start, LocalDateTime end) {
@@ -328,6 +338,7 @@ public class EventServiceImpl implements EventService {
                 .queryParam("start", start)
                 .queryParam("end", end)
                 .queryParam("uris", uris)
+                .queryParam("unique", "true")
                 .toUriString();
 
         final HttpMethod method = HttpMethod.GET;
