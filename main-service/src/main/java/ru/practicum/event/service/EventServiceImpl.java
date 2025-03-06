@@ -31,7 +31,6 @@ import ru.practicum.location.mapper.LocationDtoMapper;
 import ru.practicum.location.model.Location;
 import ru.practicum.location.service.LocationService;
 import ru.practicum.user.dto.UserDto;
-import ru.practicum.event.dto.EventViewsDto;
 import ru.practicum.user.mapper.UserDtoMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.service.UserService;
@@ -40,10 +39,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.google.gson.JsonElement;
 
 @Slf4j
 @Service("eventServiceImpl")
