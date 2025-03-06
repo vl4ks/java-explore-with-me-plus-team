@@ -43,7 +43,7 @@ public class StatsClient extends BaseClient {
 
     public ResponseEntity<Object> getStats(String start, String end, List<String> uris, Boolean unique) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/stats")
-                .queryParam("start", start))
+                .queryParam("start", start)
                 .queryParam("end", end);
 
         if (uris != null && !uris.isEmpty()) {
