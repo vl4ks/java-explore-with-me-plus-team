@@ -46,7 +46,7 @@ public class PrivateController {
     @GetMapping("/{eventId}")
     public EventFullDto findById(@PathVariable Long userId, @PathVariable Long eventId) {
         log.info("Пришел GET запрос /users/{}/events/{}", userId, eventId);
-        final EventFullDto event = eventService.findById(userId, eventId, false);
+        final EventFullDto event = eventService.findById(userId, eventId, false, null);
         log.info("Отправлен ответ GET /users/{}/events/{} с телом: {}", userId, eventId, event);
         return event;
     }

@@ -34,7 +34,7 @@ public class EventRequestServiceImpl implements EventRequestService {
     @Override
     public ParticipationRequestDto create(Long userId, Long eventId) {
         final UserDto user = userService.findById(userId);
-        final EventFullDto event = eventService.findById(userId, eventId, false);
+        final EventFullDto event = eventService.findById(userId, eventId, false, null);
         final EventRequest foundOldRequest = eventRequestRepository.findByEventIdAndRequesterId(eventId, userId);
         if (foundOldRequest != null) {
             throw new ConflictException("Trying to create already exist request");
@@ -66,7 +66,7 @@ public class EventRequestServiceImpl implements EventRequestService {
     @Override
     public EventRequestStatusUpdateResult updateStatus(Long userId, Long eventId, EventRequestStatusUpdateRequest requestsToUpdate) {
         final UserDto user = userService.findById(userId);
-        final EventFullDto event = eventService.findById(userId, eventId, false);
+        final EventFullDto event = eventService.findById(userId, eventId, false, null);
 
         if (!event.getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Not initiator of event can't be change status of requests");
@@ -115,7 +115,7 @@ public class EventRequestServiceImpl implements EventRequestService {
         if (userService.findById(eventInitiatorId) == null) {
             throw new NotFoundException("User with id=" + eventInitiatorId + " was not found");
         }
-        if (eventService.findById(eventInitiatorId, eventId, false) == null) {
+        if (eventService.findById(eventInitiatorId, eventId, false, null) == null) {
             throw new NotFoundException("Event with id=" + eventId + " was not found on user with id=" + eventInitiatorId);
         }
         final Collection<EventRequest> requests = eventRequestRepository.findByEventId(eventId);
