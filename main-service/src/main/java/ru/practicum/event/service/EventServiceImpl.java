@@ -61,7 +61,6 @@ public class EventServiceImpl implements EventService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    final DateTimeFormatter formatterSeconds = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     @Override
     public EventFullDto create(Long userId, NewEventDto eventDto) {
@@ -302,7 +301,7 @@ public class EventServiceImpl implements EventService {
                 .app(APP_NAME)
                 .uri(request.getRequestURI())
                 .ip(request.getRemoteAddr())
-                .timestamp(LocalDateTime.now().format(formatterSeconds))
+                .timestamp(LocalDateTime.now().format(formatter))
                 .build();
 
         final HttpMethod method = HttpMethod.POST;
@@ -336,8 +335,8 @@ public class EventServiceImpl implements EventService {
                 .host(STATS_SERVICE_HOST)
                 .port(STATS_SERVICE_PORT)
                 .path("/stats")
-                .queryParam("start", start)
-                .queryParam("end", end)
+                .queryParam("start", start.format(formatter))
+                .queryParam("end", end.format(formatter))
                 .queryParam("uris", uris)
                 .queryParam("unique", "true")
                 .toUriString();
