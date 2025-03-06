@@ -302,7 +302,7 @@ public class EventServiceImpl implements EventService {
                 .app(APP_NAME)
                 .uri(request.getRequestURI())
                 .ip(request.getRemoteAddr())
-                .timestamp(LocalDateTime.now().format(formatter_seconds))
+                .timestamp(LocalDateTime.now().format(formatterSeconds))
                 .build();
 
         final HttpMethod method = HttpMethod.POST;
