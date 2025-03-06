@@ -41,9 +41,9 @@ public class StatisticServiceImpl implements StatisticService {
 
         final List<StatisticRepository.ResponseStatsDto> hits;
         if (uris.isEmpty()) {
-            hits = statisticRepository.getByAllUris(start, end);
+            hits = statisticRepository.getByAllUris(start.replaceFirst("%20", " "), end.replaceFirst("%20", " "));
         } else {
-            hits = statisticRepository.getByUris(start, end, uris);
+            hits = statisticRepository.getByUris(start.replaceFirst("%20", " "), end.replaceFirst("%20", " "), uris);
         }
         return hits.stream()
                 .map(stats -> ResponseStatsDto.builder()
