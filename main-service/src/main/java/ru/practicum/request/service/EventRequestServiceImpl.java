@@ -45,7 +45,7 @@ public class EventRequestServiceImpl implements EventRequestService {
         }
         validateEventForRequest(event);
 
-        EventRequestStatus status = event.getParticipantLimit().equals(0L) || !event.getRequestModeration() ?
+        EventRequestStatus status = event.getParticipantLimit().equals(0L) && !event.getRequestModeration() ?
                 EventRequestStatus.CONFIRMED : EventRequestStatus.PENDING;
 
         final EventRequest request = new EventRequest(
