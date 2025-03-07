@@ -4,5 +4,5 @@ import ru.practicum.location.dto.LocationDto;
 
 public interface LocationService {
 
-    public LocationDto create(LocationDto locationDto);
+    LocationDto create(LocationDto locationDto);
 }

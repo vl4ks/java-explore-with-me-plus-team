@@ -7,13 +7,13 @@ import java.util.Collection;
 
 public interface CategoryService {
 
-    public CategoryDto create(NewCategoryDto newCategoryDto);
+    CategoryDto create(NewCategoryDto newCategoryDto);
 
-    public Collection<CategoryDto> findAll(Integer from, Integer size);
+    Collection<CategoryDto> findAll(Integer from, Integer size);
 
-    public CategoryDto findById(Long categoryId);
+    CategoryDto findById(Long categoryId);
 
-    public CategoryDto update(Long categoryId, CategoryDto categoryDto);
+    CategoryDto update(Long categoryId, CategoryDto categoryDto);
 
-    public void delete(Long categoryId);
+    void delete(Long categoryId);
 }

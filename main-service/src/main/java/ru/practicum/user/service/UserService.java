@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface UserService {
 
-    public UserDto create(NewUserRequest newUserRequest);
+    UserDto create(NewUserRequest newUserRequest);
 
-    public Collection<UserDto> findAll(List<Long> ids, Integer from, Integer size);
+    Collection<UserDto> findAll(List<Long> ids, Integer from, Integer size);
 
-    public UserDto findById(Long userId);
+    UserDto findById(Long userId);
 
-    public void delete(Long userId);
+    void delete(Long userId);
 }

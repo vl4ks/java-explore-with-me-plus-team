@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-    public List<Event> findAllByInitiatorId(Long initiatorId, Pageable pageable);
+    List<Event> findAllByInitiatorId(Long initiatorId, Pageable pageable);
 
     @Query("""
             SELECT e
@@ -20,7 +20,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                 AND (CAST(?4 AS timestamp) IS NULL or e.eventDate >= ?4)
                 AND (CAST(?5 AS timestamp) IS NULL or e.eventDate < ?5)
         """)
-    public List<Event> findAllByAdmin(
+    List<Event> findAllByAdmin(
             List<Long> users,
             List<String> states,
             List<Long> categories,
@@ -41,7 +41,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                 AND (CAST(?5 AS timestamp) IS NULL or e.eventDate < ?5)
                 AND (?6 = false or e.participantLimit = 0 or e.participantLimit < e.confirmedRequests)
         """)
-    public List<Event> findAllByPublic(
+    List<Event> findAllByPublic(
             String text,
             List<Long> categories,
             Boolean paid,
@@ -58,7 +58,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
         """,
         nativeQuery = true
     )
-    public void updateConfirmedRequests(Long eventId, Long confirmedRequests);
+    void updateConfirmedRequests(Long eventId, Long confirmedRequests);
 
     List<Event> findAllByIdIn(List<Long> eventIds);
 }
