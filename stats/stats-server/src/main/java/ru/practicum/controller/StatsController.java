@@ -1,5 +1,7 @@
 package ru.practicum.controller;
+
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ResponseStatsDto;
 import ru.practicum.ResponseHitDto;
@@ -28,6 +30,7 @@ public class StatsController {
     }
 
     @PostMapping("/hit")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseHitDto createHit(@RequestBody @Valid CreateHitDto createHitDto) {
         log.info("Сохранение информации об обращении к эндпоинту");
         return statisticService.create(createHitDto);
